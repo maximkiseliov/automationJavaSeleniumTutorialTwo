@@ -1,5 +1,7 @@
 package com.maximk;
 
+import bsh.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -13,19 +15,20 @@ import java.util.concurrent.TimeUnit;
 
 public class googleNumberOfWordsTest {
     private static final String chromeDriverPath = "C:\\Users\\maximk\\IdeaProjects\\chromedriver_win32\\chromedriver.exe";
+    private static final String googleURL = "https://google.com";
+    private static final String incognitoMode = "--incognito";
+    private static final String maximizeWindow = "--start-maximized";
     private WebDriver driver;
     private ChromeOptions options;
-    private String incognitoMode = "--incognito";
-    private String maximizeWindow = "--start-maximized";
-    private static final String googleURL = "https://google.com";
-    private WebElement googleSearchField, googleSearchButton;
-    private List<WebElement> links;
-    private String searchWord;
+    private WebElement googleSearchField;
+    private List<WebElement> links, linksInnerList;
+    private String listOfLinksXpath, searchWord;
 
 
     @Test
     public void getNumberOfSearchedWords() {
-        searchWord = "Pug";
+        searchWord = "Cheetah";
+        listOfLinksXpath = "//div[h2[not(contains(text(), 'People also ask'))]]//div[@class='r']//a[contains(., '" + searchWord + "') or contains(., '" + searchWord.toLowerCase() + "')]";
 
         System.setProperty("webdriver.chrome.driver", chromeDriverPath);
 
@@ -34,7 +37,7 @@ public class googleNumberOfWordsTest {
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS); // waits max 5 seconds for element to appear
-        driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS); // waits max 30 seconds to load the page
+        driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS); // waits max 30 seconds to load the page
         driver.get(googleURL);
 
         googleSearchField = driver.findElement(By.xpath("//input[@name='q']"));
@@ -42,20 +45,25 @@ public class googleNumberOfWordsTest {
         googleSearchField.sendKeys(searchWord);
         googleSearchField.submit();
 
-        String urlPageResults = driver.getCurrentUrl();
 
-        links = driver.findElements(By.xpath("//div[h2[not(contains(text(), 'People also ask'))]]//div[@class='r']//a[contains(., '" + searchWord + "') or contains(., '" + searchWord.toLowerCase() + "')]"));
+        links = driver.findElements(By.xpath(listOfLinksXpath));
+        int numberOfLinks = links.size();
         for (int i = 0; i < links.size(); i++) {
-            links.get(i).click();
-            System.out.println(driver.getTitle());
+            linksInnerList = driver.findElements(By.xpath(listOfLinksXpath));
+            linksInnerList.get(i).click();
+            System.out.println("Page title: " + driver.getTitle());
+            System.out.println("Page URL: " + driver.getCurrentUrl());
+            System.out.println(searchWord + " word occurrences on the page: " + StringUtils.countMatches(driver.getPageSource().toLowerCase(), searchWord.toLowerCase()));
+            driver.navigate().back();
         }
+//        This is my method but I got StaleElementReferenceException
 //        for (WebElement link : links) {
-//            driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
 //            System.out.println("CLICKING -> " + link.getAttribute("href") + " link...");
 //            link.click();
-//            driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
 //            System.out.println("Current Page Title: " + driver.getTitle());
 //            System.out.println("Current URL: " + driver.getCurrentUrl());
+
+//        Below is replicating StringUtils.countMatches()
 //            String[] pageSource = driver.getPageSource().split(" ");
 //            int numberOfWords = 0;
 //            for (int i = 0; i < pageSource.length; i++) {
@@ -68,8 +76,8 @@ public class googleNumberOfWordsTest {
 //            }
     }
 
-
-    public boolean isRequiredPage(WebDriver d, String expectedTitle, int timeOut) {
+// This one is not working properly
+    public boolean isRequiredPage(WebDriver d, String expectedTitle, int timeOut) { // checks if we are at desired page
         while (timeOut != 0){
             if (d.getTitle().toLowerCase().startsWith(expectedTitle))
                 return true;
