@@ -1,4 +1,4 @@
-package com.maximk;
+package google;
 
 import bsh.StringUtil;
 import org.apache.commons.lang3.StringUtils;
