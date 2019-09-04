@@ -1,13 +1,11 @@
 package newtours;
 
-import bsh.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -16,12 +14,17 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.concurrent.TimeUnit;
+
 public class newToursTests {
     private static final String chromeDriverPath = "C:\\Users\\maximk\\IdeaProjects\\chromedriver_win32\\chromedriver.exe";
     private static final String newToursURL = "http://www.newtours.demoaut.com/";
+    private static final String newToursHomePageTitle = "Welcome: Mercury Tours";
     private static final String incognitoMode = "--incognito";
     private static final String maximizeWindow = "--start-maximized";
     private WebDriver driver;
+    private static String userName;
+    private static String password;
 
     @BeforeMethod
     public void startBrowser(){
@@ -30,24 +33,29 @@ public class newToursTests {
         options.addArguments(incognitoMode, maximizeWindow);
 
         driver = new ChromeDriver(options);
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS); // waits max 5 seconds for element to appear
+        driver.manage().timeouts().pageLoadTimeout(180, TimeUnit.SECONDS); // waits max 180 seconds to load the page
+        driver.get(newToursURL);
+
+        // Making sure that we are at expected home page
+        Assert.assertEquals(driver.getTitle(), newToursHomePageTitle);
     }
 
     @AfterMethod
     public void closeBrowser() throws InterruptedException {
         Thread.sleep(4000);
-        driver.quit();
+        if (driver != null){
+            driver.close();
+            driver.quit();
+        }
     }
 
     @Test
-    public void test(){
+    public void userCreateTest(){
         String firstName = "Maxim";
         String lastName = "Lastname";
-        String userName = "mlastname@test.com";
-
-        driver.get(newToursURL);
-
-        // Making sure that we are at expected page
-        Assert.assertEquals(driver.getTitle(), "Welcome: Mercury Tours");
+        String userName = "mlastname@test.net";
+        String password = "test123";
 
         WebElement registerLink = driver.findElement(By.xpath("//td/a[text()='REGISTER']"));
         registerLink.click();
@@ -94,10 +102,10 @@ public class newToursTests {
         userNameInput.sendKeys(userName);
 
         WebElement passwordInput = driver.findElement(By.xpath("//input[@name='password']"));
-        passwordInput.sendKeys("test123");
+        passwordInput.sendKeys(password);
 
         WebElement passwordConfirmInput = driver.findElement(By.xpath("//input[@name='confirmPassword']"));
-        passwordConfirmInput.sendKeys("test123");
+        passwordConfirmInput.sendKeys(password);
 
         WebElement submitBtn = driver.findElement(By.xpath("//input[@name='register']"));
         submitBtn.click();
@@ -115,5 +123,29 @@ public class newToursTests {
         WebElement noteMsg = driver.findElement(By.xpath("//b[contains(text(), 'Note:')]"));
 //        Assert.assertEquals(noteMsg.getText().trim(), "Note: Your user name is "+ userName + ".");
         Assert.assertTrue(StringUtils.contains(noteMsg.getText(), userName));
+
+        newToursTests.userName = userName; // Assign local variable userName to Class level variable userName
+        newToursTests.password = password; // Assign local variable password to Class level variable password
+    }
+
+    @Test(dependsOnMethods = "userCreateTest")
+    public void userSignOnTest(){
+        WebElement signOnLink = driver.findElement(By.xpath("//a[text() = 'SIGN-ON']"));
+        signOnLink.click();
+
+        Assert.assertEquals(driver.getTitle(), "Sign-on: Mercury Tours");
+        Assert.assertTrue(driver.findElement(By.xpath("//img[@src='/images/masts/mast_signon.gif']")).isDisplayed());
+
+        WebElement userNameInput = driver.findElement(By.xpath("//input[@name='userName']"));
+        userNameInput.sendKeys(newToursTests.userName);
+
+        WebElement passwordInput = driver.findElement(By.xpath("//input[@name='password']"));
+        passwordInput.sendKeys(newToursTests.password);
+
+        WebElement submitBtn = driver.findElement(By.xpath("//input[@name='login' and @value='Login']"));
+        submitBtn.click();
+
+        // Check that expected image is displayed
+        Assert.assertTrue(driver.findElement(By.xpath("//img[@src='/images/masts/mast_flightfinder.gif']")).isDisplayed());
     }
 }
