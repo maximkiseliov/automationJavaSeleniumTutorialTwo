@@ -1,5 +1,6 @@
 package google;
 
+import static systemRelatedPackage.systemRelatedClass.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChromeTest {
-    private static final String chromeDriverPath = "C:\\Users\\maximk\\IdeaProjects\\chromedriver_win32\\chromedriver.exe";
+    private static final String chromeDriverPath = CHROME_DRIVE_PATH;
     private List<String> chromeOptionArguments = new ArrayList<>();
     private ChromeOptions options;
     private WebDriver driver;

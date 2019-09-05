@@ -19,8 +19,10 @@ import java.io.Writer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static systemRelatedPackage.systemRelatedClass.CHROME_DRIVE_PATH;
+
 public class googleNumberOfWordsOfFirstPages {
-    private static final String chromeDriverPath = "C:\\Users\\maximk\\IdeaProjects\\chromedriver_win32\\chromedriver.exe";
+    private static final String chromeDriverPath = CHROME_DRIVE_PATH;
     private static final String googleURL = "https://google.com";
     private static final String incognitoMode = "--incognito";
     private static final String maximizeWindow = "--start-maximized";
@@ -28,31 +30,33 @@ public class googleNumberOfWordsOfFirstPages {
 
     @BeforeMethod
     public void startBrowser(){
+        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
         ChromeOptions options = new ChromeOptions();
         options.addArguments(incognitoMode, maximizeWindow);
 
         driver = new ChromeDriver(options);
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS); // waits max 5 seconds for element to appear
+        driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS); // waits max 30 seconds to load the page
+        driver.get(googleURL);
     }
 
     @AfterMethod
-    public void closeBrowser(){
-        driver.quit();
+    public void closeBrowser() throws InterruptedException {
+        Thread.sleep(4000);
+        if (driver != null){
+            driver.close();
+            driver.quit();
+        }
     }
 
     @Test
     public void getNumberOfSearchedWords() throws InterruptedException, IOException {
-        System.setProperty("webdriver.chrome.driver", chromeDriverPath);
-
         String searchWord = "Cheetah";
         String csvFileName = searchWord + ".csv";
         Writer writer = new BufferedWriter(new FileWriter(csvFileName));
         CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("Page No", "Link No", "Title", "URL", "Occurrences"));
 
         String listOfLinksXpath = "//div[h2[not(contains(text(), 'People also ask'))]]//div[@class='r']//a[contains(., '" + searchWord + "') or contains(., '" + searchWord.toLowerCase() + "')]";
-
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS); // waits max 5 seconds for element to appear
-        driver.manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS); // waits max 30 seconds to load the page
-        driver.get(googleURL);
 
         WebElement googleSearchField = driver.findElement(By.xpath("//input[@name='q']"));
         googleSearchField.clear();

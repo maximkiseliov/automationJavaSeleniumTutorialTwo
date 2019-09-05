@@ -1,6 +1,5 @@
 package google;
 
-import bsh.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -13,8 +12,10 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static systemRelatedPackage.systemRelatedClass.CHROME_DRIVE_PATH;
+
 public class googleNumberOfWordsTest {
-    private static final String chromeDriverPath = "C:\\Users\\maximk\\IdeaProjects\\chromedriver_win32\\chromedriver.exe";
+    private static final String chromeDriverPath = CHROME_DRIVE_PATH;
     private static final String googleURL = "https://google.com";
     private static final String incognitoMode = "--incognito";
     private static final String maximizeWindow = "--start-maximized";

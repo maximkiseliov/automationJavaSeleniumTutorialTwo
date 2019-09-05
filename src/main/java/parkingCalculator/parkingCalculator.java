@@ -1,6 +1,6 @@
 package parkingCalculator;
 
-import bsh.StringUtil;
+import static systemRelatedPackage.systemRelatedClass.*;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -11,14 +11,12 @@ import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.List;
-import java.util.Map;
 
 public class parkingCalculator {
-    private static final String chromeDriverPath = "C:\\Users\\maximk\\IdeaProjects\\chromedriver_win32\\chromedriver.exe";
+    private static final String chromeDriverPath = CHROME_DRIVE_PATH;
     private static final String parkingCalculatorUrl = "http://www.shino.de/parkcalc/";
     private static final String incognitoMode = "--incognito";
     private static final String maximizeWindow = "--start-maximized";

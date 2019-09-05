@@ -4,9 +4,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+import static systemRelatedPackage.systemRelatedClass.CHROME_DRIVE_PATH;
+
 public class switchingBetweenPopUps {
     public static void main(String[] args) {
-        String chromeDriverPath = "C:\\Users\\maximk\\IdeaProjects\\chromedriver_win32\\chromedriver.exe";
+        String chromeDriverPath = CHROME_DRIVE_PATH;
 
         System.setProperty("webdriver.chrome.driver", chromeDriverPath);
         WebDriver driver = new ChromeDriver();
