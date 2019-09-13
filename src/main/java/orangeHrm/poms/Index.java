@@ -18,7 +18,7 @@ public class Index extends AbstractPOM {
     @FindBy(xpath = "//a[text()='Logout']")
     public WebElement logoutLink;
 
-    public void checkingWelcomeLinkText(String loggedPersonName){
+    public void assertWelcomeLinkText(String loggedPersonName){
         Assert.assertEquals(welcomeLink.getText(), "Welcome " + loggedPersonName);
     }
 }

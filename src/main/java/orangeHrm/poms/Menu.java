@@ -25,6 +25,5 @@ public class Menu extends AbstractPOM {
     public void navigateToUsers(){
         Action navigateToUsersAction = builder.moveToElement(adminMenuBtn).moveToElement(userManagementAdminSubOptionLink).moveToElement(usersUserManagementSubOptionLink).click().build();
         navigateToUsersAction.perform();
-
     }
 }

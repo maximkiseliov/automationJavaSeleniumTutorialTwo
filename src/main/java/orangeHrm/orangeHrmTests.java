@@ -1,22 +1,12 @@
 package orangeHrm;
 
 import orangeHrm.core.Helpers;
-import orangeHrm.poms.Index;
-import orangeHrm.poms.Login;
-import orangeHrm.poms.Menu;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
+import orangeHrm.poms.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,7 +25,6 @@ public class orangeHrmTests {
     private WebDriver driver;
     private Actions builder;
     private By pageHeaderXpath = By.xpath("//h1");
-
 
     @BeforeMethod
     public void setBrowser() {
@@ -60,44 +49,31 @@ public class orangeHrmTests {
     public void loginAsAdmin(){
         Login loginPage = new Login(driver);
         Index indexPage = new Index(driver);
-// Giving  time to load Login form
-//This is replaced
-// new WebDriverWait(driver, 10).until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath("//form[@id='frmLogin']"))));
-//By this
+
+        // Giving  time to load Login form
         Helpers.waitElementToBeVisible(driver, loginPage.loginForm, 10);
         loginPage.checkLoginPanelHeading("LOGIN Panel");
-//        login.introduceUserName(ADMIN_USERNAME);
-//        login.introducePassword(ADMIN_PASSWORD);
-//        login.clickLoginButton();
-//Since using @FindBy elements can be accessed directly
+
+        //Since using @FindBy elements can be accessed directly
         loginPage.userNameInput.sendKeys(ADMIN_USERNAME);
         loginPage.passwordInput.sendKeys(ADMIN_PASSWORD);
         loginPage.loginBtn.click();
 
-// Giving  time to load Welcome link element
-//This is replaced
-//new WebDriverWait(driver, 10).until(ExpectedConditions.visibilityOf(driver.findElement(welcomeLinkXpath)));
-//By this
+        // Giving  time to load Welcome link element
         Helpers.waitElementToBeVisible(driver, indexPage.welcomeLink, 10);
 
-//        String welcomeLinkText  = driver.findElement(welcomeLinkXpath).getText();
-//        Assert.assertTrue(StringUtils.equals(welcomeLinkText, "Welcome " + ADMIN_USERNAME));
-        indexPage.checkingWelcomeLinkText(ADMIN_USERNAME);
+        indexPage.assertWelcomeLinkText(ADMIN_USERNAME);
     }
 
     public void logout(){
         Index indexPage = new Index(driver);
         Login loginPage = new Login(driver);
-//        driver.findElement(welcomeLinkXpath).click();
         indexPage.welcomeLink.click();
 
-// Giving  time to load Logout link element
-//This is replaced
-// new WebDriverWait(driver, 10).until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath("//a[text()='Logout']"))));
-//By this
+        // Giving  time to load Logout link element
         Helpers.waitElementToBeVisible(driver, indexPage.logoutLink, 10);
         indexPage.logoutLink.click();
-        loginPage.checkLoginPageUrlAfterLogout(driver.getCurrentUrl());
+        loginPage.assertLoginPageUrlAfterLogout(driver.getCurrentUrl());
     }
 
     @Test
@@ -107,66 +83,39 @@ public class orangeHrmTests {
     }
 
     @Test(dependsOnMethods = {"loginLogoutTest"})
-    public void addNewUserTest(){
-        Menu adminMenu = new Menu(driver, builder);
+    public void addNewUserTest() throws InterruptedException {
         loginAsAdmin();
-//Code commented below was replaced using Menu POM method
-//        WebElement adminBtn = driver.findElement(By.xpath("//div[@class='menu']//a[@id='menu_admin_viewAdminModule' and contains(., 'Admin')]"));
-//        WebElement userManagementLink = driver.findElement(By.xpath("//a[@id='menu_admin_UserManagement' and text()='User Management']"));
-//        WebElement usersLink = driver.findElement(By.xpath("//a[@id='menu_admin_viewSystemUsers' and text()='Users']"));
-//        Action navigateToUsersAction = builder.moveToElement(adminBtn).moveToElement(userManagementLink).moveToElement(usersLink).click().build();
-//        navigateToUsersAction.perform();
-        adminMenu.navigateToUsers();
 
+        Menu adminMenuPage = new Menu(driver, builder);
+        adminMenuPage.navigateToUsers();
 
         // Giving  time to load Logout link element
-        new WebDriverWait(driver, 10).until(ExpectedConditions.visibilityOf(
-                driver.findElement(pageHeaderXpath)));
+        Helpers.waitElementToBeVisible(driver,  driver.findElement(pageHeaderXpath), 10);
+        Helpers.assertHeader(driver.findElement(pageHeaderXpath), "System Users");
 
-        Assert.assertEquals(driver.findElement(pageHeaderXpath).getText(), "System Users");
+        SystemUsers systemUsersPage = new SystemUsers(driver);
+        systemUsersPage.addBtn.click();
 
-        WebElement addBtn = driver.findElement(By.xpath("//input[@id='btnAdd' and @type='button']"));
-        addBtn.click();
+        // Giving  time to load Logout link element
+        Helpers.waitElementToBeVisible(driver,  driver.findElement(pageHeaderXpath), 10);
+        Helpers.assertHeader(driver.findElement(pageHeaderXpath), "Add User");
 
-        new WebDriverWait(driver, 10).until(ExpectedConditions.visibilityOf(
-                driver.findElement(pageHeaderXpath)));
+        AddUser addUserPage = new AddUser(driver, builder);
+        addUserPage.selectUserRoleFromDropDown("ESS");
 
-        Assert.assertEquals(driver.findElement(pageHeaderXpath).getText(), "Add User");
+        String employeeName = "John Smith";
+        addUserPage.findAndSelectFirstFound(employeeName);
 
-        Select userRoleSelect = new Select(driver.findElement(By.xpath("//label[text()='User Role']/following-sibling::select[@id='systemUser_userType']")));
-        userRoleSelect.selectByVisibleText("ESS");
+        addUserPage.introduceGeneratedUserName(employeeName);
 
-        String employeeName = "Steven Edwards";
-        WebElement employeeNameInput = driver.findElement(By.xpath("//label[text()='Employee Name']/following-sibling::input[@id='systemUser_employeeName_empName']"));
-        employeeNameInput.sendKeys(employeeName);
-        new WebDriverWait(driver, 10).until(ExpectedConditions.visibilityOf(
-                driver.findElement(By.xpath("//div[@class='ac_results']"))));
-        WebElement foundEmployee = driver.findElement(By.xpath("//div[@class='ac_results']/ul"));
-        Action selectEmployeeAction = builder.moveToElement(foundEmployee).click().build();
-        selectEmployeeAction.perform();
+        addUserPage.selectStatusFromDropDown("Enabled");
 
-        String userName = employeeName.toLowerCase().replace(" ", ".") + RandomStringUtils.randomNumeric(2,4);
-        WebElement userNameInput = driver.findElement(By.xpath("//label[text()='Username']/following-sibling::input[@id='systemUser_userName']"));
-        userNameInput.sendKeys(userName);
+        addUserPage.introduceGeneratedPasswordAndConfirm();
 
-        Select statusSelect = new Select(driver.findElement(By.xpath("//label[text()='Status']/following-sibling::select[@id='systemUser_status']")));
-        statusSelect.selectByVisibleText("Enabled");
+        addUserPage.saveBtn.click();
 
-        String randomPassword = RandomStringUtils.randomAlphanumeric(8,12);
-        WebElement passwordInput = driver.findElement(By.xpath("//label[text()='Password']/following-sibling::input[@id='systemUser_password']"));
-        passwordInput.sendKeys(randomPassword);
+        Helpers.waitTextToBe(driver, pageHeaderXpath, "System Users", 10);
 
-        WebElement confirmPasswordInput = driver.findElement(By.xpath("//label[text()='Confirm Password']/following-sibling::input[@id='systemUser_confirmPassword']"));
-        confirmPasswordInput.sendKeys(randomPassword);
-
-        System.out.printf("Employee Name: '%s'%nUsername: '%s'%nPassword: '%s'", employeeName, userName, randomPassword);
-
-        WebElement saveBtn = driver.findElement(By.xpath("//input[@id='btnSave' and @type='button']"));
-        saveBtn.click();
-
-        new WebDriverWait(driver, 10).until(ExpectedConditions.textToBe(
-                pageHeaderXpath, "System Users"));
-
-        Assert.assertTrue(driver.findElement(By.xpath("//div[@class='message success fadable']")).isDisplayed());
+        Helpers.assertElementDisplayed(systemUsersPage.successMessage);
     }
 }

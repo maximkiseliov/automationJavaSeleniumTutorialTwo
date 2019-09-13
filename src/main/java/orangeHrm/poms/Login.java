@@ -8,10 +8,11 @@ import org.testng.Assert;
 
 public class Login extends AbstractPOM {
 
+    String orangeHrmUrlAfterLogout = "https://opensource-demo.orangehrmlive.com/index.php/auth/login";
+
     public Login(WebDriver driver) {
         super(driver);
     }
-    String orangeHrmUrlAfterLogout = "https://opensource-demo.orangehrmlive.com/index.php/auth/login";
 
 //Keep as Strings
 //    String loginPanelHeadingXpath = "//form[@id='frmLogin']/div[@id='logInPanelHeading']";
@@ -41,7 +42,7 @@ public class Login extends AbstractPOM {
     @FindBy(xpath = "//form[div[@id='logInPanelHeading']]//input[@id='btnLogin' and @type='submit' and @value='LOGIN']")
     public WebElement loginBtn;
 
-    public void checkLoginPageUrlAfterLogout(String currentLink){
+    public void assertLoginPageUrlAfterLogout(String currentLink){
         Assert.assertEquals(currentLink, orangeHrmUrlAfterLogout);
     }
     public void checkLoginPanelHeading(String value){
